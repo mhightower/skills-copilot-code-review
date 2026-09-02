@@ -106,7 +106,7 @@ def update_announcement(
     """Update an existing announcement. Requires teacher authentication."""
     _require_teacher(teacher_username)
 
-    announcement_data = payload.model_dump(exclude_none=True)
+    announcement_data = payload.model_dump(exclude_none=False)
     if not announcement_data.get("title", "").strip():
         raise HTTPException(status_code=400, detail="Title is required")
     if not announcement_data.get("message", "").strip():
@@ -116,15 +116,23 @@ def update_announcement(
     if announcement_data.get("start_date") == "":
         announcement_data.pop("start_date")
 
+    from bson.errors import InvalidId
+    from bson.objectid import ObjectId
+
+    try:
+        object_id = ObjectId(announcement_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid announcement id")
+
     result = announcements_collection.update_one(
-        {"_id": announcement_id},
+        {"_id": object_id},
         {"$set": announcement_data}
     )
 
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Announcement not found")
 
-    updated = announcements_collection.find_one({"_id": announcement_id})
+    updated = announcements_collection.find_one({"_id": object_id})
     return _serialize_announcement(updated)
 
 
