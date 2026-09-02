@@ -141,7 +141,15 @@ def delete_announcement(announcement_id: str, teacher_username: Optional[str] = 
     """Delete an announcement. Requires teacher authentication."""
     _require_teacher(teacher_username)
 
-    result = announcements_collection.delete_one({"_id": announcement_id})
+    from bson.errors import InvalidId
+    from bson.objectid import ObjectId
+
+    try:
+        object_id = ObjectId(announcement_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid announcement id")
+
+    result = announcements_collection.delete_one({"_id": object_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Announcement not found")
 
