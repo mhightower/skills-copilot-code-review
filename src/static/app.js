@@ -842,7 +842,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const activeAnnouncement = announcements[0];
-      announcementBannerText.textContent = `📢 ${activeAnnouncement.message}`;
+      announcementBannerText.textContent = activeAnnouncement.message;
       announcementBanner.classList.remove("hidden");
     } catch (error) {
       console.error("Error fetching active announcements:", error);
