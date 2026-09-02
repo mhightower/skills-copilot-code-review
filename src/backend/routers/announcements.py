@@ -57,8 +57,10 @@ def _get_active_filter() -> Dict[str, Any]:
 
 @router.get("", response_model=List[Dict[str, Any]])
 @router.get("/", response_model=List[Dict[str, Any]])
-def get_announcements() -> List[Dict[str, Any]]:
-    """Get all announcements, sorted by most urgent upcoming expiration date first."""
+def get_announcements(teacher_username: Optional[str] = Query(None)) -> List[Dict[str, Any]]:
+    """Get all announcements, sorted by most urgent upcoming expiration date first. Requires teacher authentication."""
+    _require_teacher(teacher_username)
+
     announcements = []
     for announcement in announcements_collection.find({}).sort("expires_at", 1):
         announcements.append(_serialize_announcement(announcement))
